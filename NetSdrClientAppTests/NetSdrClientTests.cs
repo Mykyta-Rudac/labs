@@ -1,10 +1,10 @@
 ﻿using Moq;
 using NetSdrClientApp;
 using NetSdrClientApp.Networking;
-using Xunit;
+using Xunit; // Використовуємо Xunit
 using System.Threading.Tasks;
 using System;
-using System.Linq; // Додано для використання методу SequenceEqual
+using System.Linq; 
 
 namespace NetSdrClientAppTests;
 
@@ -20,7 +20,6 @@ public class NetSdrClientTests
         _udpMock = new Mock<IUdpClient>();
 
         _tcpMock.Setup(t => t.Connected).Returns(true);
-        // Припускаємо, що NetSdrClient має конструктор, який приймає ITcpClient та IUdpClient
         _client = new NetSdrClient(_tcpMock.Object, _udpMock.Object); 
     }
 
@@ -35,7 +34,6 @@ public class NetSdrClientTests
 
         // Assert
         _tcpMock.Verify(t => t.Connect(), Times.Once);
-        // Перевірка, що було відправлено рівно 3 ініціалізаційні повідомлення
         _tcpMock.Verify(t => t.SendMessageAsync(It.IsAny<byte[]>()), Times.Exactly(3));
     }
 
@@ -43,7 +41,7 @@ public class NetSdrClientTests
     public void Disconnect_ShouldInvokeTcpDisconnect()
     {
         // Act
-        _client.Disconect(); // Примітка: Скоріш за все, метод має називатися Disconnect()
+        _client.Disconect();
 
         // Assert
         _tcpMock.Verify(t => t.Disconnect(), Times.Once);
@@ -59,7 +57,8 @@ public class NetSdrClientTests
         await _client.StartIQAsync();
 
         // Assert
-        Assert.True(_client.IQStarted);
+        // Явно вказуємо Xunit.Assert
+        Xunit.Assert.True(_client.IQStarted); 
         _udpMock.Verify(u => u.StartListeningAsync(), Times.Once);
     }
 
@@ -68,14 +67,14 @@ public class NetSdrClientTests
     {
         // Arrange
         _tcpMock.Setup(t => t.SendMessageAsync(It.IsAny<byte[]>())).Returns(Task.CompletedTask);
-        // Встановлюємо IQStarted = true для коректної перевірки зміни
         _client.IQStarted = true; 
 
         // Act
         await _client.StopIQAsync();
 
         // Assert
-        Assert.False(_client.IQStarted);
+        // Явно вказуємо Xunit.Assert
+        Xunit.Assert.False(_client.IQStarted); 
         _udpMock.Verify(u => u.StopListening(), Times.Once);
     }
 
@@ -83,12 +82,11 @@ public class NetSdrClientTests
     public async Task ChangeFrequencyAsync_ShouldSendMessage_WithCorrectArgs()
     {
         // Arrange
-        long testFrequency = 123456789L; // Використовуємо більшу частоту для надійності
+        long testFrequency = 123456789L;
         int channel = 2;
 
         byte[] sentMessage = null!;
         _tcpMock.Setup(t => t.SendMessageAsync(It.IsAny<byte[]>()))
-                // Використовуємо Callback для захоплення фактично відправленого масиву байтів
                 .Callback<byte[]>(msg => sentMessage = msg) 
                 .Returns(Task.CompletedTask);
 
@@ -97,20 +95,17 @@ public class NetSdrClientTests
 
         // Assert
         _tcpMock.Verify(t => t.SendMessageAsync(It.IsAny<byte[]>()), Times.Once);
-        Assert.NotNull(sentMessage);
+        // Явно вказуємо Xunit.Assert
+        Xunit.Assert.NotNull(sentMessage);
+        // Явно вказуємо Xunit.Assert
+        Xunit.Assert.Contains(sentMessage, b => b == (byte)channel);
 
-        // 1. Перевірка, що повідомлення містить байт каналу
-        Assert.Contains(sentMessage, b => b == (byte)channel);
-
-        // 2. Додана перевірка: Отримуємо байтове представлення частоти
-        // Примітка: Це припускає, що NetSdrClient використовує BitConverter для кодування long
         byte[] frequencyBytes = BitConverter.GetBytes(testFrequency); 
 
-        // 3. Перевірка, що послідовність байтів частоти міститься у відправленому повідомленні
-        // Це вимагає, щоб порядок байтів був послідовним і без розривів.
         bool containsFrequency = CheckIfArrayContainsSubarray(sentMessage, frequencyBytes);
 
-        Assert.True(containsFrequency, "Відправлене повідомлення повинно містити байтове представлення частоти.");
+        // Явно вказуємо Xunit.Assert
+        Xunit.Assert.True(containsFrequency, "Відправлене повідомлення повинно містити байтове представлення частоти.");
     }
     
     // Допоміжний метод для перевірки, чи міститься підмасив (subArray) в основному масиві (mainArray)
@@ -136,8 +131,8 @@ public class NetSdrClientTests
         await _client.StartIQAsync();
 
         // Assert
-        // Перевірка, що слухання UDP ніколи не запускалося
         _udpMock.Verify(u => u.StartListeningAsync(), Times.Never); 
-        Assert.False(_client.IQStarted);
+        // Явно вказуємо Xunit.Assert
+        Xunit.Assert.False(_client.IQStarted); 
     }
 }
