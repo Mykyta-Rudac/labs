@@ -1,7 +1,15 @@
 ﻿using Moq;
 using NetSdrClientApp;
 using NetSdrClientApp.Networking;
+using System;
+using System.Threading.Tasks;
+using Moq;
+using Xunit;
+using NetSdrClientApp;
+using NetSdrClientApp.Networking;
+using NetSdrClientApp.Messages;
 
+namespace NetSdrClientAppTests;
 namespace NetSdrClientAppTests;
 
 public class NetSdrClientTests
@@ -116,16 +124,8 @@ public class NetSdrClientTests
     }
 
     //TODO: cover the rest of the NetSdrClient code here
-using System;
-using System.Threading.Tasks;
-using Moq;
-using Xunit;
-using NetSdrClientApp;
-using NetSdrClientApp.Networking;
-using NetSdrClientApp.Messages;
 
-namespace NetSdrClientAppTests
-{
+
     public class NetSdrClientTests
     {
         private readonly Mock<ITcpClient> _tcpMock;
@@ -231,4 +231,4 @@ namespace NetSdrClientAppTests
     }
 }
     
-}
+
