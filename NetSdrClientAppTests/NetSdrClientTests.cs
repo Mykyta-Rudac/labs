@@ -40,6 +40,10 @@ public class NetSdrClientTests
     public async Task ConnectAsync_ShouldCallConnectAndSendThreeInitMessages_WhenNotConnected()
     {
         // Arrange
+        // ВАЖЛИВО: Скидаємо попередній загальний мок SendMessageAsync, 
+        // щоб забезпечити коректну роботу SetupSequence.
+        _tcpMock.Invocations.Clear(); 
+        
         // Симулюємо цикл: Непідключений -> Виклик Connect() -> Підключений.
         _tcpMock.SetupSequence(t => t.Connected)
             .Returns(false) // Спочатку не підключений
@@ -61,6 +65,8 @@ public class NetSdrClientTests
         _tcpMock.Verify(t => t.Connect(), Times.Once); 
         
         // 2. Повинно бути відправлено рівно 3 ініціалізаційні повідомлення
+        // Якщо виклик Connect() був успішним, то _tcpMock.Invocations.Clear() вище не вплине на цю перевірку,
+        // оскільки Connect() викликається до викликів SendMessageAsync.
         _tcpMock.Verify(t => t.SendMessageAsync(It.IsAny<byte[]>()), Times.Exactly(3));
     }
 
