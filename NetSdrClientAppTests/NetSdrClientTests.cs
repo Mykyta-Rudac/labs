@@ -13,17 +13,17 @@ public class NetSdrClientTests
     private readonly Mock<ITcpClient> _tcpMock;
     private readonly Mock<IUdpClient> _udpMock;
     private readonly NetSdrClient _client;
-
+    
+    // ВАЖЛИВО: Оскільки ми будемо змінювати мок t.Connected у Тесті 1,
+    // видаляємо глобальне налаштування Connected з конструктора, 
+    // щоб не конфліктувати з налаштуванням початкового стану у Тесті 1.
+    // Замість цього, ми налаштуємо поведінку Connected в кожному тесті явно.
     public NetSdrClientTests()
     {
         _tcpMock = new Mock<ITcpClient>();
         _udpMock = new Mock<IUdpClient>();
-
-        // Налаштування для більшості тестів: клієнт підключений
-        _tcpMock.Setup(t => t.Connected).Returns(true); 
         
         // Переконайтеся, що SendMessageAsync мокається для повернення Task.CompletedTask
-        // Мок для ConnectAsync, StartIQAsync, StopIQAsync
         _tcpMock.Setup(t => t.SendMessageAsync(It.IsAny<byte[]>())).Returns(Task.CompletedTask);
 
         _client = new NetSdrClient(_tcpMock.Object, _udpMock.Object); 
@@ -40,18 +40,19 @@ public class NetSdrClientTests
     public async Task ConnectAsync_ShouldCallConnectAndSendThreeInitMessages_WhenNotConnected()
     {
         // Arrange
-        // ВАЖЛИВО: Скидаємо попередній загальний мок SendMessageAsync, 
-        // щоб забезпечити коректну роботу SetupSequence.
         _tcpMock.Invocations.Clear(); 
         
-        // Симулюємо цикл: Непідключений -> Виклик Connect() -> Підключений.
-        _tcpMock.SetupSequence(t => t.Connected)
-            .Returns(false) // Спочатку не підключений
-            .Returns(true)  // Після виклику Connect() в клієнті
-            .Returns(true); 
+        // 1. Встановлюємо початковий стан: НЕ ПІДКЛЮЧЕНИЙ
+        _tcpMock.Setup(t => t.Connected).Returns(false);
+        
+        // 2. Встановлюємо, що після виклику t.Connect() стан ПІДКЛЮЧЕНИЙ стає true
+        _tcpMock.Setup(t => t.Connect()).Callback(() => 
+        {
+            _tcpMock.Setup(t => t.Connected).Returns(true);
+        });
 
-        // Налаштовуємо мок для симуляції трьох відповідей TCP, 
-        // щоб завершити SendTcpRequest, який викликається 3 рази в ConnectAsync
+        // 3. Налаштовуємо мок для симуляції трьох відповідей TCP 
+        // (це також вирішує проблему зависання, як ми робили раніше)
         _tcpMock.SetupSequence(t => t.SendMessageAsync(It.IsAny<byte[]>()))
                 .Returns(() => { SimulateTcpResponse(new byte[] { 0x01 }); return Task.CompletedTask; })
                 .Returns(() => { SimulateTcpResponse(new byte[] { 0x02 }); return Task.CompletedTask; })
@@ -65,8 +66,6 @@ public class NetSdrClientTests
         _tcpMock.Verify(t => t.Connect(), Times.Once); 
         
         // 2. Повинно бути відправлено рівно 3 ініціалізаційні повідомлення
-        // Якщо виклик Connect() був успішним, то _tcpMock.Invocations.Clear() вище не вплине на цю перевірку,
-        // оскільки Connect() викликається до викликів SendMessageAsync.
         _tcpMock.Verify(t => t.SendMessageAsync(It.IsAny<byte[]>()), Times.Exactly(3));
     }
 
@@ -75,6 +74,7 @@ public class NetSdrClientTests
     public async Task ConnectAsync_ShouldNotAttemptToConnect_WhenAlreadyConnected()
     {
         // Arrange
+        // Налаштовуємо початковий стан: ПІДКЛЮЧЕНИЙ
         _tcpMock.Setup(t => t.Connected).Returns(true);
         
         // Act
@@ -102,6 +102,7 @@ public class NetSdrClientTests
     public async Task StartIQAsync_ShouldSendReceiverStateAndStartUdpListening_WhenConnected()
     {
         // Arrange
+        _tcpMock.Setup(t => t.Connected).Returns(true);
         _client.IQStarted = false; 
 
         // !!! ВИПРАВЛЕННЯ ДЛЯ ЗАВИСАННЯ: Симулюємо відповідь TCP одразу після відправки повідомлення !!!
@@ -131,6 +132,7 @@ public class NetSdrClientTests
     public async Task StopIQAsync_ShouldSendReceiverStateAndStopUdpListening()
     {
         // Arrange
+        _tcpMock.Setup(t => t.Connected).Returns(true);
         _client.IQStarted = true; 
         
         // !!! ВИПРАВЛЕННЯ ДЛЯ ЗАВИСАННЯ: Симулюємо відповідь TCP одразу після відправки повідомлення !!!
@@ -159,6 +161,7 @@ public class NetSdrClientTests
     public async Task ChangeFrequencyAsync_ShouldSendMessage_WithCorrectFrequencyEncoding()
     {
         // Arrange
+        _tcpMock.Setup(t => t.Connected).Returns(true);
         long testFrequency = 433920000L;
         int channel = 1;
 
