@@ -1,12 +1,12 @@
 # Лабораторні з реінжинірингу (8×)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Labs&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Labs)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Labs&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Labs)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Labs&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Labs)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Labs&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=Labs)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Labs&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=Labs)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Labs&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Labs)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Labs&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Labs)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Labs&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Labs)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Mykyta-Rudac/Labs&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Mykyta-Rudac/Labs)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Mykyta-Rudac/Labs&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Mykyta-Rudac/Labs)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Mykyta-Rudac/Labs&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Mykyta-Rudac/Labs)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Mykyta-Rudac/Labs&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=Mykyta-Rudac/Labs)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Mykyta-Rudac/Labs&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=Mykyta-Rudac/Labs)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Mykyta-Rudac/Labs&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Mykyta-Rudac/Labs)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Mykyta-Rudac/Labs&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Mykyta-Rudac/Labs)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Mykyta-Rudac/Labs&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Mykyta-Rudac/Labs)
 
 
 Цей репозиторій використовується для курсу **реінжиніринг ПЗ**. 
