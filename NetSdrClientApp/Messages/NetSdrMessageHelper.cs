@@ -83,9 +83,12 @@ namespace NetSdrClientApp.Messages
                 msgEnumarable = msgEnumarable.Skip(_msgControlItemLength);
                 msgLength -= _msgControlItemLength;
 
-                if (Enum.IsDefined(typeof(ControlItemCodes), value))
+                // BitConverter returns UInt16; Enum.IsDefined expects the enum underlying type (int),
+                // so convert value to int before checking.
+                int intValue = value;
+                if (Enum.IsDefined(typeof(ControlItemCodes), intValue))
                 {
-                    itemCode = (ControlItemCodes)value;
+                    itemCode = (ControlItemCodes)intValue;
                 }
                 else
                 {
