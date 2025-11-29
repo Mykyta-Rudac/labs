@@ -51,9 +51,9 @@ jobs:
       - name: Build
         run: dotnet build NetSdrClient.sln -c Release --no-restore
 
-      # РОЗКОМЕНТОВУЄМО ПІЗНІШЕ ДЛЯ ЛАБИ 3:
-      # - name: Test with coverage
-      #   run: dotnet test NetSdrClientAppTests -c Release /p:CollectCoverage=true /p:CoverletOutput=TestResults/coverage.xml /p:CoverletOutputFormat=opencover
+      - name: Test with coverage
+        run: dotnet test NetSdrClientAppTests -c Release /p:CollectCoverage=true /p:CoverletOutput=TestResults/coverage.xml /p:CoverletOutputFormat=opencover
+        shell: pwsh
 
       - name: End SonarCloud analysis
         run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
