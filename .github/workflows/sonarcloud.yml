@@ -35,8 +35,8 @@ jobs:
       - name: Begin SonarCloud analysis
         run: |
           dotnet sonarscanner begin `
-          /k:"ppanchen_NetSdrClient" `
-          /o:"ppanchen" `
+          /k:"Mykyta-Rudac_labs" `
+          /o:"rykyta-rudac" `
           /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
           /d:sonar.cs.opencover.reportsPaths="**/coverage.xml" `
           /d:sonar.cpd.cs.minimumTokens=40 `
