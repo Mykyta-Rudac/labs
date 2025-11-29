@@ -1,39 +1,15 @@
 using Moq;
 using NetSdrClientApp;
 using NetSdrClientApp.Networking;
-using System.Reflection;
 
 namespace NetSdrClientAppTests;
 
-public class NetSdrClientAdditionalTests
+/// <summary>
+/// Additional tests for NetSdrClient advanced functionality (frequency change, message handlers, etc.).
+/// Inherits common mock setup from NetSdrClientTestBase to eliminate code duplication.
+/// </summary>
+public class NetSdrClientAdditionalTests : NetSdrClientTestBase
 {
-    private NetSdrClient _client;
-    private Mock<ITcpClient> _tcpMock;
-    private Mock<IUdpClient> _udpMock;
-
-    [SetUp]
-    public void Setup()
-    {
-        _tcpMock = new Mock<ITcpClient>();
-        _tcpMock.Setup(tcp => tcp.Connect()).Callback(() =>
-        {
-            _tcpMock.Setup(tcp => tcp.Connected).Returns(true);
-        });
-
-        _tcpMock.Setup(tcp => tcp.Disconnect()).Callback(() =>
-        {
-            _tcpMock.Setup(tcp => tcp.Connected).Returns(false);
-        });
-
-        _tcpMock.Setup(tcp => tcp.SendMessageAsync(It.IsAny<byte[]>())).Callback<byte[]>((bytes) =>
-        {
-            _tcpMock.Raise(tcp => tcp.MessageReceived += null, _tcpMock.Object, bytes);
-        });
-
-        _udpMock = new Mock<IUdpClient>();
-
-        _client = new NetSdrClient(_tcpMock.Object, _udpMock.Object);
-    }
 
     [Test]
     public async Task ChangeFrequencyAsyncTest()
