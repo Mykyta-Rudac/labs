@@ -4,37 +4,12 @@ using NetSdrClientApp.Networking;
 
 namespace NetSdrClientAppTests;
 
-public class NetSdrClientTests
+/// <summary>
+/// Tests for NetSdrClient basic functionality (connect, disconnect, IQ start/stop).
+/// Inherits common mock setup from NetSdrClientTestBase to eliminate code duplication.
+/// </summary>
+public class NetSdrClientTests : NetSdrClientTestBase
 {
-    NetSdrClient _client;
-    Mock<ITcpClient> _tcpMock;
-    Mock<IUdpClient> _updMock;
-
-    public NetSdrClientTests() { }
-
-    [SetUp]
-    public void Setup()
-    {
-        _tcpMock = new Mock<ITcpClient>();
-        _tcpMock.Setup(tcp => tcp.Connect()).Callback(() =>
-        {
-            _tcpMock.Setup(tcp => tcp.Connected).Returns(true);
-        });
-
-        _tcpMock.Setup(tcp => tcp.Disconnect()).Callback(() =>
-        {
-            _tcpMock.Setup(tcp => tcp.Connected).Returns(false);
-        });
-
-        _tcpMock.Setup(tcp => tcp.SendMessageAsync(It.IsAny<byte[]>())).Callback<byte[]>((bytes) =>
-        {
-            _tcpMock.Raise(tcp => tcp.MessageReceived += null, _tcpMock.Object, bytes);
-        });
-
-        _updMock = new Mock<IUdpClient>();
-
-        _client = new NetSdrClient(_tcpMock.Object, _updMock.Object);
-    }
 
     [Test]
     public async Task ConnectAsyncTest()
@@ -96,7 +71,7 @@ public class NetSdrClientTests
 
         //assert
         //No exception thrown
-        _updMock.Verify(udp => udp.StartListeningAsync(), Times.Once);
+        _udpMock.Verify(udp => udp.StartListeningAsync(), Times.Once);
         Assert.That(_client.IQStarted, Is.True);
     }
 
@@ -111,7 +86,7 @@ public class NetSdrClientTests
 
         //assert
         //No exception thrown
-        _updMock.Verify(tcp => tcp.StopListening(), Times.Once);
+        _udpMock.Verify(tcp => tcp.StopListening(), Times.Once);
         Assert.That(_client.IQStarted, Is.False);
     }
 

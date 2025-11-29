@@ -58,11 +58,24 @@ namespace NetSdrClientApp
             _tcpClient.Disconnect();
         }
 
-        public async Task StartIQAsync()
+        /// <summary>
+        /// Ensures TCP client is connected. Returns false and logs if not connected.
+        /// This eliminates duplicated connection checks throughout the class.
+        /// </summary>
+        private bool EnsureConnected()
         {
             if (!_tcpClient.Connected)
             {
                 Console.WriteLine("No active connection.");
+                return false;
+            }
+            return true;
+        }
+
+        public async Task StartIQAsync()
+        {
+            if (!EnsureConnected())
+            {
                 return;
             }
 
@@ -84,9 +97,8 @@ namespace NetSdrClientApp
 
         public async Task StopIQAsync()
         {
-            if (!_tcpClient.Connected)
+            if (!EnsureConnected())
             {
-                Console.WriteLine("No active connection.");
                 return;
             }
 
@@ -135,9 +147,8 @@ namespace NetSdrClientApp
 
         private async Task<byte[]> SendTcpRequest(byte[] msg)
         {
-            if (!_tcpClient.Connected)
+            if (!EnsureConnected())
             {
-                Console.WriteLine("No active connection.");
                 return null;
             }
 
