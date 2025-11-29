@@ -16,7 +16,7 @@ namespace NetSdrClientApp.Networking
         private int _port;
         private TcpClient? _tcpClient;
         private NetworkStream? _stream;
-        private CancellationTokenSource _cts;
+        private CancellationTokenSource? _cts;
 
         public bool Connected => _tcpClient != null && _tcpClient.Connected && _stream != null;
 
@@ -57,6 +57,7 @@ namespace NetSdrClientApp.Networking
             if (Connected)
             {
                 _cts?.Cancel();
+                _cts?.Dispose();
                 _stream?.Close();
                 _tcpClient?.Close();
 
@@ -128,6 +129,8 @@ namespace NetSdrClientApp.Networking
                 finally
                 {
                     Console.WriteLine("Listener stopped.");
+                    _cts?.Dispose();
+                    _cts = null;
                 }
             }
             else
