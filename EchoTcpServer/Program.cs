@@ -17,18 +17,32 @@ namespace EchoTcpServer
         private TcpListener _listener;
         private CancellationTokenSource _cancellationTokenSource;
 
+        private TaskCompletionSource<bool> _startedTcs;
+
+        /// <summary>
+        /// Actual port assigned to the listener (useful when caller passes 0 for ephemeral port).
+        /// </summary>
+        public int ActualPort { get; private set; }
 
         public EchoServer(int port)
         {
             _port = port;
             _cancellationTokenSource = new CancellationTokenSource();
+            _startedTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         }
 
         public async Task StartAsync()
         {
             _listener = new TcpListener(IPAddress.Any, _port);
             _listener.Start();
-            Console.WriteLine($"Server started on port {_port}.");
+            // record the actual bound port (if ephemeral port was requested)
+            if (_listener.LocalEndpoint is IPEndPoint ep)
+            {
+                ActualPort = ep.Port;
+            }
+            // signal that start completed
+            _startedTcs.TrySetResult(true);
+            Console.WriteLine($"Server started on port {ActualPort}.");
 
             while (!_cancellationTokenSource.Token.IsCancellationRequested)
             {
@@ -47,6 +61,23 @@ namespace EchoTcpServer
             }
 
             Console.WriteLine("Server shutdown.");
+        }
+
+        /// <summary>
+        /// Wait until the server has started and bound to a port (or timeout).
+        /// Returns true if server started within timeout, false otherwise.
+        /// </summary>
+        public async Task<bool> WaitUntilStartedAsync(TimeSpan timeout)
+        {
+            try
+            {
+                await _startedTcs.Task.WaitAsync(timeout);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private async Task HandleClientAsync(TcpClient client, CancellationToken token)
