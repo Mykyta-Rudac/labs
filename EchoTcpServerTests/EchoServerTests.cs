@@ -18,8 +18,8 @@ public class EchoServerTests
 
         // Wait until server started and bound
         var started = await server.WaitUntilStartedAsync(TimeSpan.FromSeconds(5));
-        Assert.IsTrue(started, "Server did not start in time");
-        Assert.Greater(server.ActualPort, 0, "Server bound to invalid port");
+        Assert.That(started, Is.True, "Server did not start in time");
+        Assert.That(server.ActualPort, Is.GreaterThan(0), "Server bound to invalid port");
 
         // Act: connect client and send data
         using (var client = new TcpClient())
@@ -34,8 +34,8 @@ public class EchoServerTests
             var buffer = new byte[message.Length];
             var read = await stream.ReadAsync(buffer, 0, buffer.Length);
 
-            Assert.AreEqual(message.Length, read, "Echoed byte count differs");
-            Assert.AreEqual("hello-echo", Encoding.UTF8.GetString(buffer, 0, read));
+            Assert.That(read, Is.EqualTo(message.Length), "Echoed byte count differs");
+            Assert.That(Encoding.UTF8.GetString(buffer, 0, read), Is.EqualTo("hello-echo"));
         }
 
         // Cleanup
