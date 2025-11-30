@@ -107,7 +107,7 @@ namespace NetSdrClientApp.Networking
                 {
                     Console.WriteLine($"Starting listening for incomming messages.");
 
-                    while (!_cts.Token.IsCancellationRequested)
+                    while (_cts != null && !_cts.Token.IsCancellationRequested)
                     {
                         byte[] buffer = new byte[8194];
 
@@ -118,9 +118,9 @@ namespace NetSdrClientApp.Networking
                         }
                     }
                 }
-                catch (OperationCanceledException ex)
+                catch (OperationCanceledException)
                 {
-                    //empty
+                    // Operation was cancelled
                 }
                 catch (Exception ex)
                 {

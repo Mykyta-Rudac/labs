@@ -37,9 +37,9 @@ namespace NetSdrClientApp.Networking
                     Console.WriteLine($"Received from {result.RemoteEndPoint}");
                 }
             }
-            catch (OperationCanceledException ex)
+            catch (OperationCanceledException)
             {
-                //empty
+                // Operation was cancelled
             }
             catch (Exception ex)
             {

@@ -26,10 +26,8 @@ namespace NetSdrClientAppTests
         public async Task StartListeningAsyncTest()
         {
             // Arrange
-            bool messageReceived = false;
             _udpClient.MessageReceived += (sender, data) =>
             {
-                messageReceived = true;
             };
 
             // Act

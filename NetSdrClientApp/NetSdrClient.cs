@@ -16,6 +16,7 @@ namespace NetSdrClientApp
     {
         private ITcpClient _tcpClient;
         private IUdpClient _udpClient;
+        private TaskCompletionSource<byte[]>? _responseTaskSource;
 
         public bool IQStarted { get; set; }
 
@@ -143,32 +144,33 @@ namespace NetSdrClientApp
             }
         }
 
-        private TaskCompletionSource<byte[]> responseTaskSource;
+        // Response task source used for awaiting TCP responses
+        // (kept nullable to avoid non-nullable warnings)
 
         private async Task<byte[]> SendTcpRequest(byte[] msg)
         {
             if (!EnsureConnected())
             {
-                return null;
+                return Array.Empty<byte>();
             }
 
-            responseTaskSource = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
-            var responseTask = responseTaskSource.Task;
+            _responseTaskSource = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var responseTask = _responseTaskSource.Task;
 
             await _tcpClient.SendMessageAsync(msg);
 
             var resp = await responseTask;
 
-            return resp;
+            return resp ?? Array.Empty<byte>();
         }
 
         private void _tcpClient_MessageReceived(object? sender, byte[] e)
         {
             //TODO: add Unsolicited messages handling here
-            if (responseTaskSource != null)
+            if (_responseTaskSource != null)
             {
-                responseTaskSource.SetResult(e);
-                responseTaskSource = null;
+                _responseTaskSource.SetResult(e);
+                _responseTaskSource = null;
             }
             Console.WriteLine("Response recieved: " + e.Select(b => Convert.ToString(b, toBase: 16)).Aggregate((l, r) => $"{l} {r}"));
         }
