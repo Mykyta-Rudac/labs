@@ -129,6 +129,7 @@ namespace EchoTcpServer
             Console.WriteLine("Server stopped.");
         }
 
+        [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         public static async Task Main(string[] args)
         {
             EchoServer server = new EchoServer(5000);
