@@ -46,9 +46,13 @@ namespace NetSdrClientApp.Networking
                 Console.WriteLine($"Connected to {_host}:{_port}");
                 _ = StartListeningAsync();
             }
-            catch (Exception ex)
+            catch (SocketException ex)
             {
-                Console.WriteLine($"Failed to connect: {ex.Message}");
+                Console.WriteLine($"Socket error while connecting: {ex.Message}");
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine($"Invalid operation while connecting: {ex.Message}");
             }
         }
 
@@ -122,9 +126,13 @@ namespace NetSdrClientApp.Networking
                 {
                     // Operation was cancelled
                 }
-                catch (Exception ex)
+                catch (IOException ex)
                 {
-                    Console.WriteLine($"Error in listening loop: {ex.Message}");
+                    Console.WriteLine($"I/O error in listening loop: {ex.Message}");
+                }
+                catch (SocketException ex)
+                {
+                    Console.WriteLine($"Socket error in listening loop: {ex.Message}");
                 }
                 finally
                 {

@@ -99,9 +99,13 @@ namespace EchoTcpServer
                         Console.WriteLine($"Echoed {bytesRead} bytes to the client.");
                     }
                 }
-                catch (Exception ex) when (!(ex is OperationCanceledException))
+                catch (IOException ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
+                    Console.WriteLine($"I/O error: {ex.Message}");
+                }
+                catch (SocketException ex)
+                {
+                    Console.WriteLine($"Socket error: {ex.Message}");
                 }
                 finally
                 {
@@ -200,9 +204,17 @@ namespace EchoTcpServer
                 _udpClient.Send(msg, msg.Length, endpoint);
                 Console.WriteLine($"Message sent to {_host}:{_port} ");
             }
-            catch (Exception ex)
+            catch (FormatException ex)
             {
-                Console.WriteLine($"Error sending message: {ex.Message}");
+                Console.WriteLine($"Invalid host format: {ex.Message}");
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine($"Socket error sending message: {ex.Message}");
+            }
+            catch (ObjectDisposedException ex)
+            {
+                Console.WriteLine($"UDP client disposed: {ex.Message}");
             }
         }
 

@@ -41,9 +41,14 @@ namespace NetSdrClientApp.Networking
             {
                 // Operation was cancelled
             }
-            catch (Exception ex)
+            catch (SocketException ex)
             {
-                Console.WriteLine($"Error receiving message: {ex.Message}");
+                Console.WriteLine($"Socket error receiving message: {ex.Message}");
+                throw;
+            }
+            catch (ObjectDisposedException)
+            {
+                // socket disposed while stopping
             }
             finally
             {
@@ -60,9 +65,13 @@ namespace NetSdrClientApp.Networking
                 _udpClient?.Close();
                 Console.WriteLine("Stopped listening for UDP messages.");
             }
-            catch (Exception ex)
+            catch (ObjectDisposedException)
             {
-                Console.WriteLine($"Error while stopping: {ex.Message}");
+                // already disposed
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine($"Socket error while stopping: {ex.Message}");
             }
         }
 
