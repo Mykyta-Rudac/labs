@@ -71,6 +71,9 @@ namespace EchoTcpServer
         {
             try
             {
+                if (_startedTcs == null)
+                    return false;
+
                 await _startedTcs.Task.WaitAsync(timeout);
                 return true;
             }
@@ -110,9 +113,19 @@ namespace EchoTcpServer
 
         public void Stop()
         {
-            _cancellationTokenSource.Cancel();
-            _listener.Stop();
-            _cancellationTokenSource.Dispose();
+            if (_cancellationTokenSource != null)
+            {
+                try { _cancellationTokenSource.Cancel(); } catch { }
+                _cancellationTokenSource.Dispose();
+                _cancellationTokenSource = null;
+            }
+
+            if (_listener != null)
+            {
+                try { _listener.Stop(); } catch { }
+                _listener = null;
+            }
+
             Console.WriteLine("Server stopped.");
         }
 
