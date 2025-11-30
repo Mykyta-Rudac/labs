@@ -5,7 +5,7 @@ namespace NetSdrClientApp.Helpers
 {
     internal static class DebugHelpers
     {
-        public static string ToHexString(byte[] data)
+        public static string ToHexString(byte[]? data)
         {
             if (data == null || data.Length == 0) return string.Empty;
             try
