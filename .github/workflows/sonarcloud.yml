@@ -38,7 +38,7 @@ jobs:
           /k:"Mykyta-Rudac_labs" `
           /o:"mykyta-rudac" `
           /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
-          /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" `
+          /d:sonar.cs.opencover.reportsPaths="**/TestResults/coverage.opencover.xml,**/coverage.opencover.xml,**/*coverage.opencover.xml" `
           /d:sonar.cpd.cs.minimumTokens=40 `
           /d:sonar.cpd.cs.minimumLines=5 `
           /d:sonar.exclusions=**/bin/**,**/obj/**,**/sonarcloud.yml `
