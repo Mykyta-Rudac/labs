@@ -132,7 +132,7 @@ namespace NetSdrClientApp
             NetSdrMessageHelper.TranslateMessage(e, out MsgTypes type, out ControlItemCodes code, out ushort sequenceNum, out byte[] body);
             var samples = NetSdrMessageHelper.GetSamples(16, body);
 
-            Console.WriteLine($"Samples recieved: " + body.Select(b => Convert.ToString(b, toBase: 16)).Aggregate((l, r) => $"{l} {r}"));
+            Console.WriteLine($"Samples recieved: " + NetSdrClientApp.Helpers.DebugHelpers.ToHexString(body));
 
             using (FileStream fs = new FileStream("samples.bin", FileMode.Append, FileAccess.Write, FileShare.Read))
             using (BinaryWriter sw = new BinaryWriter(fs))
@@ -172,7 +172,7 @@ namespace NetSdrClientApp
                 _responseTaskSource.SetResult(e);
                 _responseTaskSource = null;
             }
-            Console.WriteLine("Response recieved: " + e.Select(b => Convert.ToString(b, toBase: 16)).Aggregate((l, r) => $"{l} {r}"));
+            Console.WriteLine("Response recieved: " + NetSdrClientApp.Helpers.DebugHelpers.ToHexString(e));
         }
     }
 }

@@ -76,7 +76,7 @@ namespace NetSdrClientApp.Networking
         {
             if (Connected && _stream != null && _stream.CanWrite)
             {
-                Console.WriteLine($"Message sent: " + data.Select(b => Convert.ToString(b, toBase: 16)).Aggregate((l, r) => $"{l} {r}"));
+                Console.WriteLine($"Message sent: " + NetSdrClientApp.Helpers.DebugHelpers.ToHexString(data));
                 await _stream.WriteAsync(data, 0, data.Length);
             }
             else
@@ -90,7 +90,7 @@ namespace NetSdrClientApp.Networking
             var data = Encoding.UTF8.GetBytes(str);
             if (Connected && _stream != null && _stream.CanWrite)
             {
-                Console.WriteLine($"Message sent: " + data.Select(b => Convert.ToString(b, toBase: 16)).Aggregate((l, r) => $"{l} {r}"));
+                Console.WriteLine($"Message sent: " + NetSdrClientApp.Helpers.DebugHelpers.ToHexString(data));
                 await _stream.WriteAsync(data, 0, data.Length);
             }
             else

@@ -13,34 +13,54 @@ var udpClient = new UdpClientWrapper(60000);
 
 var netSdr = new NetSdrClient(tcpClient, udpClient);
 
-while (true)
+await new ConsoleRunner(netSdr).RunAsync();
+
+internal class ConsoleRunner
 {
-    var key = Console.ReadKey(intercept: true).Key;
-    if (key == ConsoleKey.C)
+    private readonly NetSdrClient _netSdr;
+
+    public ConsoleRunner(NetSdrClient netSdr)
     {
-        await netSdr.ConnectAsync();
+        _netSdr = netSdr;
     }
-    else if (key == ConsoleKey.D)
+
+    public async Task RunAsync()
     {
-        netSdr.Disconect();
-    }
-    else if (key == ConsoleKey.F)
-    {
-        await netSdr.ChangeFrequencyAsync(20000000, 1);
-    }
-    else if (key == ConsoleKey.S)
-    {
-        if (netSdr.IQStarted)
+        while (true)
         {
-            await netSdr.StopIQAsync();
+            var key = Console.ReadKey(intercept: true).Key;
+            if (key == ConsoleKey.C)
+            {
+                await _netSdr.ConnectAsync();
+            }
+            else if (key == ConsoleKey.D)
+            {
+                _netSdr.Disconect();
+            }
+            else if (key == ConsoleKey.F)
+            {
+                await _netSdr.ChangeFrequencyAsync(20000000, 1);
+            }
+            else if (key == ConsoleKey.S)
+            {
+                await HandleStartStopAsync();
+            }
+            else if (key == ConsoleKey.Q)
+            {
+                break;
+            }
+        }
+    }
+
+    private async Task HandleStartStopAsync()
+    {
+        if (_netSdr.IQStarted)
+        {
+            await _netSdr.StopIQAsync();
         }
         else
         {
-            await netSdr.StartIQAsync();
+            await _netSdr.StartIQAsync();
         }
-    }
-    else if (key == ConsoleKey.Q)
-    {
-        break;
     }
 }
