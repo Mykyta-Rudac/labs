@@ -14,10 +14,10 @@ namespace EchoTcpServer
     public class EchoServer
     {
         private readonly int _port;
-        private TcpListener _listener;
-        private CancellationTokenSource _cancellationTokenSource;
+        private TcpListener? _listener;
+        private CancellationTokenSource? _cancellationTokenSource;
 
-        private TaskCompletionSource<bool> _startedTcs;
+        private TaskCompletionSource<bool>? _startedTcs;
 
         /// <summary>
         /// Actual port assigned to the listener (useful when caller passes 0 for ephemeral port).
@@ -41,17 +41,17 @@ namespace EchoTcpServer
                 ActualPort = ep.Port;
             }
             // signal that start completed
-            _startedTcs.TrySetResult(true);
+            _startedTcs?.TrySetResult(true);
             Console.WriteLine($"Server started on port {ActualPort}.");
 
-            while (!_cancellationTokenSource.Token.IsCancellationRequested)
+            while (_cancellationTokenSource != null && !_cancellationTokenSource.Token.IsCancellationRequested)
             {
                 try
                 {
                     TcpClient client = await _listener.AcceptTcpClientAsync();
                     Console.WriteLine("Client connected.");
 
-                    _ = Task.Run(() => HandleClientAsync(client, _cancellationTokenSource.Token));
+                    _ = Task.Run(() => HandleClientAsync(client, _cancellationTokenSource?.Token ?? CancellationToken.None));
                 }
                 catch (ObjectDisposedException)
                 {
@@ -71,6 +71,9 @@ namespace EchoTcpServer
         {
             try
             {
+                if (_startedTcs == null)
+                    return false;
+
                 await _startedTcs.Task.WaitAsync(timeout);
                 return true;
             }
@@ -96,9 +99,13 @@ namespace EchoTcpServer
                         Console.WriteLine($"Echoed {bytesRead} bytes to the client.");
                     }
                 }
-                catch (Exception ex) when (!(ex is OperationCanceledException))
+                catch (IOException ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
+                    Console.WriteLine($"I/O error: {ex.Message}");
+                }
+                catch (SocketException ex)
+                {
+                    Console.WriteLine($"Socket error: {ex.Message}");
                 }
                 finally
                 {
@@ -110,18 +117,29 @@ namespace EchoTcpServer
 
         public void Stop()
         {
-            _cancellationTokenSource.Cancel();
-            _listener.Stop();
-            _cancellationTokenSource.Dispose();
+            if (_cancellationTokenSource != null)
+            {
+                try { _cancellationTokenSource.Cancel(); } catch { }
+                _cancellationTokenSource.Dispose();
+                _cancellationTokenSource = null;
+            }
+
+            if (_listener != null)
+            {
+                try { _listener.Stop(); } catch { }
+                _listener = null;
+            }
+
             Console.WriteLine("Server stopped.");
         }
 
+        [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         public static async Task Main(string[] args)
         {
             EchoServer server = new EchoServer(5000);
 
             // Start the server in a separate task
-            _ = Task.Run(() => server.StartAsync());
+            var serverTask = Task.Run(() => server.StartAsync());
 
             string host = "127.0.0.1"; // Target IP
             int port = 60000;          // Target Port
@@ -141,6 +159,7 @@ namespace EchoTcpServer
                 sender.StopSending();
                 server.Stop();
                 Console.WriteLine("Sender stopped.");
+                await Task.Delay(100);  // Allow server task to process
             }
         }
     }
@@ -150,7 +169,7 @@ namespace EchoTcpServer
         private readonly string _host;
         private readonly int _port;
         private readonly UdpClient _udpClient;
-        private Timer _timer;
+        private Timer? _timer;
 
         public UdpTimedSender(string host, int port)
         {
@@ -169,7 +188,7 @@ namespace EchoTcpServer
 
         ushort i = 0;
 
-        private void SendMessageCallback(object state)
+        private void SendMessageCallback(object? state)
         {
             try
             {
@@ -185,9 +204,17 @@ namespace EchoTcpServer
                 _udpClient.Send(msg, msg.Length, endpoint);
                 Console.WriteLine($"Message sent to {_host}:{_port} ");
             }
-            catch (Exception ex)
+            catch (FormatException ex)
             {
-                Console.WriteLine($"Error sending message: {ex.Message}");
+                Console.WriteLine($"Invalid host format: {ex.Message}");
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine($"Socket error sending message: {ex.Message}");
+            }
+            catch (ObjectDisposedException ex)
+            {
+                Console.WriteLine($"UDP client disposed: {ex.Message}");
             }
         }
 

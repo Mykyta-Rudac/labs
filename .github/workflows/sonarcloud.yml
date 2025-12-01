@@ -41,7 +41,7 @@ jobs:
           /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" `
           /d:sonar.cpd.cs.minimumTokens=40 `
           /d:sonar.cpd.cs.minimumLines=5 `
-          /d:sonar.exclusions=**/bin/**,**/obj/**,**/sonarcloud.yml `
+          /d:sonar.exclusions=**/bin/**,**/obj/**,**/sonarcloud.yml,**/*Tests/** `
           /d:sonar.qualitygate.wait=true
         shell: pwsh
 

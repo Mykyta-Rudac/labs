@@ -46,9 +46,13 @@ namespace NetSdrClientApp.Networking
                 Console.WriteLine($"Connected to {_host}:{_port}");
                 _ = StartListeningAsync();
             }
-            catch (Exception ex)
+            catch (SocketException ex)
             {
-                Console.WriteLine($"Failed to connect: {ex.Message}");
+                Console.WriteLine($"Socket error while connecting: {ex.Message}");
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine($"Invalid operation while connecting: {ex.Message}");
             }
         }
 
@@ -76,7 +80,7 @@ namespace NetSdrClientApp.Networking
         {
             if (Connected && _stream != null && _stream.CanWrite)
             {
-                Console.WriteLine($"Message sent: " + data.Select(b => Convert.ToString(b, toBase: 16)).Aggregate((l, r) => $"{l} {r}"));
+                Console.WriteLine($"Message sent: " + NetSdrClientApp.Helpers.DebugHelpers.ToHexString(data));
                 await _stream.WriteAsync(data, 0, data.Length);
             }
             else
@@ -90,7 +94,7 @@ namespace NetSdrClientApp.Networking
             var data = Encoding.UTF8.GetBytes(str);
             if (Connected && _stream != null && _stream.CanWrite)
             {
-                Console.WriteLine($"Message sent: " + data.Select(b => Convert.ToString(b, toBase: 16)).Aggregate((l, r) => $"{l} {r}"));
+                Console.WriteLine($"Message sent: " + NetSdrClientApp.Helpers.DebugHelpers.ToHexString(data));
                 await _stream.WriteAsync(data, 0, data.Length);
             }
             else
@@ -107,7 +111,7 @@ namespace NetSdrClientApp.Networking
                 {
                     Console.WriteLine($"Starting listening for incomming messages.");
 
-                    while (!_cts.Token.IsCancellationRequested)
+                    while (_cts != null && !_cts.Token.IsCancellationRequested)
                     {
                         byte[] buffer = new byte[8194];
 
@@ -118,13 +122,17 @@ namespace NetSdrClientApp.Networking
                         }
                     }
                 }
-                catch (OperationCanceledException ex)
+                catch (OperationCanceledException)
                 {
-                    //empty
+                    // Operation was cancelled
                 }
-                catch (Exception ex)
+                catch (IOException ex)
                 {
-                    Console.WriteLine($"Error in listening loop: {ex.Message}");
+                    Console.WriteLine($"I/O error in listening loop: {ex.Message}");
+                }
+                catch (SocketException ex)
+                {
+                    Console.WriteLine($"Socket error in listening loop: {ex.Message}");
                 }
                 finally
                 {
