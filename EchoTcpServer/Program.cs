@@ -189,7 +189,7 @@ namespace EchoTcpServer
 
         private ushort _sequenceCounter;
 
-        public void SendMessageCallback(object? state)
+        private void SendMessageCallback(object? state)
         {
             try
             {
