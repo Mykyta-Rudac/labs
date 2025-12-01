@@ -2,10 +2,9 @@ name: SonarCloud analysis
 
 on:
   push:
-    # run analysis on master and the feature branch 'lab8' so PRs and pushes are checked
-    branches: [ "master", "lab8" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "master", "lab8" ]
+    branches: [ "master" ]
   workflow_dispatch:
 
 permissions:
