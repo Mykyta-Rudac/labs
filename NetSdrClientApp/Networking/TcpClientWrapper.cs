@@ -78,70 +78,58 @@ namespace NetSdrClientApp.Networking
 
         public async Task SendMessageAsync(byte[] data)
         {
-            if (Connected && _stream != null && _stream.CanWrite)
-            {
-                Console.WriteLine($"Message sent: " + NetSdrClientApp.Helpers.DebugHelpers.ToHexString(data));
-                await _stream.WriteAsync(data.AsMemory());
-            }
-            else
-            {
-                throw new InvalidOperationException("Not connected to a server.");
-            }
+            ThrowIfNotConnected();
+            Console.WriteLine($"Message sent: " + NetSdrClientApp.Helpers.DebugHelpers.ToHexString(data));
+            await _stream!.WriteAsync(data.AsMemory());
         }
 
         public async Task SendMessageAsync(string str)
         {
             var data = Encoding.UTF8.GetBytes(str);
-            if (Connected && _stream != null && _stream.CanWrite)
-            {
-                Console.WriteLine($"Message sent: " + NetSdrClientApp.Helpers.DebugHelpers.ToHexString(data));
-                await _stream.WriteAsync(data.AsMemory());
-            }
-            else
-            {
-                throw new InvalidOperationException("Not connected to a server.");
-            }
+            await SendMessageAsync(data);
         }
 
         private async Task StartListeningAsync()
         {
-            if (Connected && _stream != null && _stream.CanRead)
+            ThrowIfNotConnected();
+            try
             {
-                try
+                Console.WriteLine($"Starting listening for incomming messages.");
+
+                while (_cts != null && !_cts.Token.IsCancellationRequested)
                 {
-                    Console.WriteLine($"Starting listening for incomming messages.");
+                    byte[] buffer = new byte[8194];
 
-                    while (_cts != null && !_cts.Token.IsCancellationRequested)
+                    int bytesRead = await _stream!.ReadAsync(buffer, _cts.Token);
+                    if (bytesRead > 0)
                     {
-                        byte[] buffer = new byte[8194];
-
-                        int bytesRead = await _stream.ReadAsync(buffer, _cts.Token);
-                        if (bytesRead > 0)
-                        {
-                            MessageReceived?.Invoke(this, buffer.AsSpan(0, bytesRead).ToArray());
-                        }
+                        MessageReceived?.Invoke(this, buffer.AsSpan(0, bytesRead).ToArray());
                     }
                 }
-                catch (OperationCanceledException)
-                {
-                    // Operation was cancelled
-                }
-                catch (IOException ex)
-                {
-                    NetSdrClientApp.Helpers.LogHelper.Log($"I/O error in listening loop: {ex.Message}");
-                }
-                catch (SocketException ex)
-                {
-                    NetSdrClientApp.Helpers.LogHelper.LogSocketError("Socket error in listening loop", ex);
-                }
-                finally
-                {
-                    Console.WriteLine("Listener stopped.");
-                    _cts?.Dispose();
-                    _cts = null;
-                }
             }
-            else
+            catch (OperationCanceledException)
+            {
+                // Operation was cancelled
+            }
+            catch (IOException ex)
+            {
+                NetSdrClientApp.Helpers.LogHelper.Log($"I/O error in listening loop: {ex.Message}");
+            }
+            catch (SocketException ex)
+            {
+                NetSdrClientApp.Helpers.LogHelper.LogSocketError("Socket error in listening loop", ex);
+            }
+            finally
+            {
+                Console.WriteLine("Listener stopped.");
+                _cts?.Dispose();
+                _cts = null;
+            }
+        }
+
+        private void ThrowIfNotConnected()
+        {
+            if (!Connected)
             {
                 throw new InvalidOperationException("Not connected to a server.");
             }
