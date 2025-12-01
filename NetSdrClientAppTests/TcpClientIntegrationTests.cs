@@ -50,7 +50,7 @@ namespace NetSdrClientAppTests
             clientWrapper.MessageReceived += (s, data) => tcs.TrySetResult(data);
 
             var serverWrite = Encoding.UTF8.GetBytes("hello-client");
-            await serverStream.WriteAsync(serverWrite, 0, serverWrite.Length);
+            await serverStream.WriteAsync(serverWrite.AsMemory());
 
             var clientReceived = await Task.WhenAny(tcs.Task, Task.Delay(1000));
             Assert.That(clientReceived == tcs.Task, Is.True, "Client did not receive message in time");

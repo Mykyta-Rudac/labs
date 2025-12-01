@@ -124,7 +124,7 @@ namespace EchoTcpServerTests
                     // send 20000 bytes to force multiple read/write cycles
                     byte[] payload = new byte[20000];
                     new Random(1).NextBytes(payload);
-                    await stream.WriteAsync(payload, 0, payload.Length);
+                    await stream.WriteAsync(payload.AsMemory());
 
                     byte[] buffer = new byte[payload.Length];
                     int offset = 0;
@@ -201,7 +201,7 @@ namespace EchoTcpServerTests
                 {
                     // Send a partial message
                     byte[] partialMsg = new byte[] { 0x01, 0x02 };
-                    await stream.WriteAsync(partialMsg, 0, partialMsg.Length);
+                    await stream.WriteAsync(partialMsg.AsMemory());
 
                     // Abruptly close the connection (simulates network error/disconnect)
                     stream.Close();

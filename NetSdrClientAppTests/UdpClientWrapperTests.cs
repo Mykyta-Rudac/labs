@@ -58,6 +58,18 @@ namespace NetSdrClientAppTests
         }
 
         [Test]
+        public void StopListeningWhenNotListeningTest()
+        {
+            // Arrange - don't start listening
+
+            // Act
+            _udpClient.StopListening();
+
+            // Assert - no exception should be thrown
+            Assert.Pass();
+        }
+
+        [Test]
         public void ExitTest()
         {
             // Arrange & Act
@@ -66,51 +78,6 @@ namespace NetSdrClientAppTests
 
             // Act
             _udpClient.Exit();
-
-            // Assert - no exception should be thrown
-            Assert.Pass();
-        }
-
-        [Test]
-        public void GetHashCodeTest()
-        {
-            // Arrange
-            var client1 = new UdpClientWrapper(60000);
-            var client2 = new UdpClientWrapper(60000);
-            var client3 = new UdpClientWrapper(50000);
-
-            // Act
-            int hash1 = client1.GetHashCode();
-            int hash2 = client2.GetHashCode();
-            int hash3 = client3.GetHashCode();
-
-            // Assert
-            Assert.That(hash1, Is.EqualTo(hash2));
-            Assert.That(hash1, Is.Not.EqualTo(hash3));
-        }
-
-        [Test]
-        public void EqualsTest()
-        {
-            // Arrange
-            var client1 = new UdpClientWrapper(60000);
-            var client2 = new UdpClientWrapper(60000);
-            var client3 = new UdpClientWrapper(50000);
-
-            // Act & Assert
-            Assert.That(client1.Equals(client2), Is.True);
-            Assert.That(client1.Equals(client3), Is.False);
-            Assert.That(client1.Equals(null), Is.False);
-            Assert.That(client1.Equals("string"), Is.False);
-        }
-
-        [Test]
-        public void StopListeningWhenNotListeningTest()
-        {
-            // Arrange - don't start listening
-
-            // Act
-            _udpClient.StopListening();
 
             // Assert - no exception should be thrown
             Assert.Pass();

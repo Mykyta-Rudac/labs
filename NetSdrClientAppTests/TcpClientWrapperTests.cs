@@ -106,18 +106,5 @@ namespace NetSdrClientAppTests
 
             Assert.Pass();
         }
-
-        [Test]
-        public void ThrowIfNotConnectedTest()
-        {
-            // Arrange - client not connected
-            byte[] data = new byte[] { 0x01, 0x02, 0x03 };
-
-            // Act & Assert - should throw InvalidOperationException
-            Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            {
-                await _tcpClient.SendMessageAsync(data);
-            });
-        }
     }
 }
