@@ -43,7 +43,7 @@ namespace NetSdrClientApp.Networking
             }
             catch (SocketException ex)
             {
-                Console.WriteLine($"Socket error receiving message: {ex.Message}");
+                NetSdrClientApp.Helpers.LogHelper.LogSocketError("Socket error receiving message", ex);
                 throw;
             }
             catch (ObjectDisposedException)
@@ -71,7 +71,7 @@ namespace NetSdrClientApp.Networking
             }
             catch (SocketException ex)
             {
-                Console.WriteLine($"Socket error while stopping: {ex.Message}");
+                NetSdrClientApp.Helpers.LogHelper.LogSocketError("Socket error while stopping", ex);
             }
         }
 

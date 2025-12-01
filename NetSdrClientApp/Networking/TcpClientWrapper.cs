@@ -43,16 +43,16 @@ namespace NetSdrClientApp.Networking
                 _cts = new CancellationTokenSource();
                 _tcpClient.Connect(_host, _port);
                 _stream = _tcpClient.GetStream();
-                Console.WriteLine($"Connected to {_host}:{_port}");
+                NetSdrClientApp.Helpers.LogHelper.Log($"Connected to {_host}:{_port}");
                 _ = StartListeningAsync();
             }
             catch (SocketException ex)
             {
-                Console.WriteLine($"Socket error while connecting: {ex.Message}");
+                NetSdrClientApp.Helpers.LogHelper.LogSocketError("Socket error while connecting", ex);
             }
             catch (InvalidOperationException ex)
             {
-                Console.WriteLine($"Invalid operation while connecting: {ex.Message}");
+                NetSdrClientApp.Helpers.LogHelper.Log($"Invalid operation while connecting: {ex.Message}");
             }
         }
 
@@ -128,11 +128,11 @@ namespace NetSdrClientApp.Networking
                 }
                 catch (IOException ex)
                 {
-                    Console.WriteLine($"I/O error in listening loop: {ex.Message}");
+                    NetSdrClientApp.Helpers.LogHelper.Log($"I/O error in listening loop: {ex.Message}");
                 }
                 catch (SocketException ex)
                 {
-                    Console.WriteLine($"Socket error in listening loop: {ex.Message}");
+                    NetSdrClientApp.Helpers.LogHelper.LogSocketError("Socket error in listening loop", ex);
                 }
                 finally
                 {

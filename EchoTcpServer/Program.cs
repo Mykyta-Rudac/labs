@@ -101,11 +101,11 @@ namespace EchoTcpServer
                 }
                 catch (IOException ex)
                 {
-                    Console.WriteLine($"I/O error: {ex.Message}");
+                    EchoTcpServer.LogHelper.Log($"I/O error: {ex.Message}");
                 }
                 catch (SocketException ex)
                 {
-                    Console.WriteLine($"Socket error: {ex.Message}");
+                    EchoTcpServer.LogHelper.LogSocketError("Socket error", ex);
                 }
                 finally
                 {
@@ -207,15 +207,15 @@ namespace EchoTcpServer
             }
             catch (FormatException ex)
             {
-                Console.WriteLine($"Invalid host format: {ex.Message}");
+                EchoTcpServer.LogHelper.Log($"Invalid host format: {ex.Message}");
             }
             catch (SocketException ex)
             {
-                Console.WriteLine($"Socket error sending message: {ex.Message}");
+                EchoTcpServer.LogHelper.LogSocketError("Socket error sending message", ex);
             }
             catch (ObjectDisposedException ex)
             {
-                Console.WriteLine($"UDP client disposed: {ex.Message}");
+                EchoTcpServer.LogHelper.Log($"UDP client disposed: {ex.Message}");
             }
         }
 
