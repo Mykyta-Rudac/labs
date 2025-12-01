@@ -2,9 +2,10 @@ name: SonarCloud analysis
 
 on:
   push:
-    branches: [ "master" ]
+    # run analysis on master and the feature branch 'lab8' so PRs and pushes are checked
+    branches: [ "master", "lab8" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "lab8" ]
   workflow_dispatch:
 
 permissions:
@@ -41,7 +42,7 @@ jobs:
           /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" `
           /d:sonar.cpd.cs.minimumTokens=40 `
           /d:sonar.cpd.cs.minimumLines=5 `
-          /d:sonar.exclusions=**/bin/**,**/obj/**,**/sonarcloud.yml `
+          /d:sonar.exclusions=**/bin/**,**/obj/**,**/sonarcloud.yml,**/*Tests/** `
           /d:sonar.qualitygate.wait=true
         shell: pwsh
 
