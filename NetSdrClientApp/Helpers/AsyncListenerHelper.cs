@@ -10,25 +10,29 @@ namespace NetSdrClientApp.Helpers
     /// </summary>
     public static class AsyncListenerHelper
     {
-        public static void HandleListenerException(Exception ex, string context)
+        /// <summary>
+        /// Handle common listener exceptions.
+        /// Returns true if the caller should rethrow the exception (used for UDP where SocketException is rethrown).
+        /// </summary>
+        public static bool HandleListenerException(Exception ex, string context, bool rethrowSocket = false)
         {
             switch (ex)
             {
                 case OperationCanceledException:
                     // Operation was cancelled - this is normal shutdown
-                    break;
+                    return false;
                 case IOException ioEx:
                     LogHelper.Log($"I/O error {context}: {ioEx.Message}");
-                    break;
+                    return false;
                 case SocketException sockEx:
                     LogHelper.LogSocketError($"Socket error {context}", sockEx);
-                    break;
+                    return rethrowSocket;
                 case ObjectDisposedException _:
                     // Socket or resource disposed during shutdown
-                    break;
+                    return false;
                 default:
                     LogHelper.Log($"Unexpected error {context}: {ex.Message}");
-                    break;
+                    return false;
             }
         }
     }

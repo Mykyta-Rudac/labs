@@ -104,17 +104,10 @@ namespace NetSdrClientApp.Networking
                     }
                 }
             }
-            catch (OperationCanceledException)
+            catch (Exception ex)
             {
-                // Operation was cancelled
-            }
-            catch (IOException ex)
-            {
-                NetSdrClientApp.Helpers.LogHelper.Log($"I/O error in listening loop: {ex.Message}");
-            }
-            catch (SocketException ex)
-            {
-                NetSdrClientApp.Helpers.LogHelper.LogSocketError("Socket error in listening loop", ex);
+                // reuse centralized handling; do not rethrow for TCP
+                NetSdrClientApp.Helpers.AsyncListenerHelper.HandleListenerException(ex, "incomming messages");
             }
             finally
             {

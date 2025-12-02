@@ -37,18 +37,11 @@ namespace NetSdrClientApp.Networking
                     Console.WriteLine($"Received from {result.RemoteEndPoint}");
                 }
             }
-            catch (OperationCanceledException)
+            catch (Exception ex)
             {
-                // Operation was cancelled
-            }
-            catch (SocketException ex)
-            {
-                NetSdrClientApp.Helpers.LogHelper.LogSocketError("Socket error receiving message", ex);
-                throw;
-            }
-            catch (ObjectDisposedException)
-            {
-                // socket disposed while stopping
+                // For UDP we want to rethrow on SocketException to let callers observe it
+                if (NetSdrClientApp.Helpers.AsyncListenerHelper.HandleListenerException(ex, "receiving message", rethrowSocket: true))
+                    throw;
             }
             finally
             {
