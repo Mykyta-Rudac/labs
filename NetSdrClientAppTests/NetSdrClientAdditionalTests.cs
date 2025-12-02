@@ -4,6 +4,7 @@ using NetSdrClientApp.Helpers;
 using NetSdrClientApp.Networking;
 using System.IO;
 using System.Net.Sockets;
+using Common.Helpers;
 
 namespace NetSdrClientAppTests;
 
