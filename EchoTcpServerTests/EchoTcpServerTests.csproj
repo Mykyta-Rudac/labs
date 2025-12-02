@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EchoTcpServer\EchoServer.csproj" />
+    <ProjectReference Include="..\Common.Helpers\Common.Helpers.csproj" />
   </ItemGroup>
 
 </Project>

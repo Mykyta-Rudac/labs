@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
 using EchoTcpServer;
+using Common.Helpers;
 
 namespace EchoTcpServerTests
 {

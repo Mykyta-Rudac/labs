@@ -4,6 +4,7 @@ using System.Net.Sockets;
 // No cryptographic hash required for GetHashCode; use HashCode.Combine instead
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Helpers;
 
 namespace NetSdrClientApp.Networking
 {
@@ -39,7 +40,7 @@ namespace NetSdrClientApp.Networking
             catch (Exception ex)
             {
                 // For UDP we want to rethrow on SocketException to let callers observe it
-                if (NetSdrClientApp.Helpers.AsyncListenerHelper.HandleListenerException(ex, "receiving message", rethrowSocket: true))
+                if (AsyncListenerHelper.HandleListenerException(ex, "receiving message", rethrowSocket: true))
                     throw;
             }
             finally
@@ -60,7 +61,7 @@ namespace NetSdrClientApp.Networking
             catch (Exception ex)
             {
                 // ObjectDisposedException (already disposed) or SocketException (already stopped) are expected during cleanup
-                NetSdrClientApp.Helpers.AsyncListenerHelper.HandleListenerException(ex, "stopping UDP listener");
+                AsyncListenerHelper.HandleListenerException(ex, "stopping UDP listener");
             }
         }
 

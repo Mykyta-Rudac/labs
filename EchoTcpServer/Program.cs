@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Helpers;
 
 namespace EchoTcpServer
 {
@@ -101,11 +102,11 @@ namespace EchoTcpServer
                 }
                 catch (IOException ex)
                 {
-                    EchoTcpServer.LogHelper.Log($"I/O error: {ex.Message}");
+                    LogHelper.Log($"I/O error: {ex.Message}");
                 }
                 catch (SocketException ex)
                 {
-                    EchoTcpServer.LogHelper.LogSocketError("Socket error", ex);
+                    LogHelper.LogSocketError("Socket error", ex);
                 }
                 finally
                 {
@@ -207,15 +208,15 @@ namespace EchoTcpServer
             }
             catch (FormatException ex)
             {
-                EchoTcpServer.LogHelper.Log($"Invalid host format: {ex.Message}");
+                LogHelper.Log($"Invalid host format: {ex.Message}");
             }
             catch (SocketException ex)
             {
-                EchoTcpServer.LogHelper.LogSocketError("Socket error sending message", ex);
+                LogHelper.LogSocketError("Socket error sending message", ex);
             }
             catch (ObjectDisposedException ex)
             {
-                EchoTcpServer.LogHelper.Log($"UDP client disposed: {ex.Message}");
+                LogHelper.Log($"UDP client disposed: {ex.Message}");
             }
         }
 

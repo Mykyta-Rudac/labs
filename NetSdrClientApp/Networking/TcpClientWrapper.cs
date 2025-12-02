@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Helpers;
 
 namespace NetSdrClientApp.Networking
 {
@@ -33,23 +34,23 @@ namespace NetSdrClientApp.Networking
                 return;
             }
 
-            _tcpClient = new TcpClient();
+                _tcpClient = new TcpClient();
 
             try
             {
                 _cts = new CancellationTokenSource();
                 _tcpClient.Connect(_host, _port);
                 _stream = _tcpClient.GetStream();
-                NetSdrClientApp.Helpers.LogHelper.Log($"Connected to {_host}:{_port}");
+                LogHelper.Log($"Connected to {_host}:{_port}");
                 _ = StartListeningAsync();
             }
             catch (SocketException ex)
             {
-                NetSdrClientApp.Helpers.LogHelper.LogSocketError("Socket error while connecting", ex);
+                LogHelper.LogSocketError("Socket error while connecting", ex);
             }
             catch (InvalidOperationException ex)
             {
-                NetSdrClientApp.Helpers.LogHelper.Log($"Invalid operation while connecting: {ex.Message}");
+                LogHelper.Log($"Invalid operation while connecting: {ex.Message}");
             }
         }
 
@@ -107,7 +108,7 @@ namespace NetSdrClientApp.Networking
             catch (Exception ex)
             {
                 // reuse centralized handling; do not rethrow for TCP
-                NetSdrClientApp.Helpers.AsyncListenerHelper.HandleListenerException(ex, "incomming messages");
+                AsyncListenerHelper.HandleListenerException(ex, "incomming messages");
             }
             finally
             {

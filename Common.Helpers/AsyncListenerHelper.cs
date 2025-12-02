@@ -1,12 +1,12 @@
 using System;
-using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace NetSdrClientApp.Helpers
+namespace Common.Helpers
 {
     /// <summary>
-    /// Helper class to consolidate exception handling for async listening operations.
+    /// Shared helper for async listening operations.
+    /// Centralizes exception handling logic for TCP/UDP listeners to reduce code duplication.
     /// </summary>
     public static class AsyncListenerHelper
     {
