@@ -99,10 +99,13 @@ namespace EchoTcpServer
                         Console.WriteLine($"Echoed {bytesRead} bytes to the client.");
                     }
                 }
-                catch (Exception ex)
+                catch (IOException ex)
                 {
-                    // centralize handling; do not rethrow for echo server
-                    NetSdrClientApp.Helpers.AsyncListenerHelper.HandleListenerException(ex, "echo client handling");
+                    EchoTcpServer.LogHelper.Log($"I/O error: {ex.Message}");
+                }
+                catch (SocketException ex)
+                {
+                    EchoTcpServer.LogHelper.LogSocketError("Socket error", ex);
                 }
                 finally
                 {
