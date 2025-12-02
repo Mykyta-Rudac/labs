@@ -23,7 +23,7 @@ namespace NetSdrClientApp.Helpers
                 case SocketException sockEx:
                     LogHelper.LogSocketError($"Socket error {context}", sockEx);
                     break;
-                case ObjectDisposedException dispEx:
+                case ObjectDisposedException _:
                     // Socket or resource disposed during shutdown
                     break;
                 default:
