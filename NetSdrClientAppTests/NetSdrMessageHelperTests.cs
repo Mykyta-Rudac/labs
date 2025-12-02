@@ -1,4 +1,5 @@
 using NetSdrClientApp.Messages;
+using System.Linq;
 
 namespace NetSdrClientAppTests
 {

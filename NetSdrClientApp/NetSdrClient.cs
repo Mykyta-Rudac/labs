@@ -128,7 +128,7 @@ namespace NetSdrClientApp
 
         private static void _udpClient_MessageReceived(object? sender, byte[] e)
         {
-            NetSdrMessageHelper.TranslateMessage(e, out var type, out var code, out var sequenceNum, out var body);
+            NetSdrMessageHelper.TranslateMessage(e, out _, out _, out _, out var body);
             var samples = NetSdrMessageHelper.GetSamples(16, body);
 
             Console.WriteLine($"Samples recieved: " + NetSdrClientApp.Helpers.DebugHelpers.ToHexString(body));
