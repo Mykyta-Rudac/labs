@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
-using System.Text;
+// No cryptographic hash required for GetHashCode; use HashCode.Combine instead
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -75,11 +74,8 @@ namespace NetSdrClientApp.Networking
 
         public override int GetHashCode()
         {
-            var payload = $"{nameof(UdpClientWrapper)}|{_localEndPoint.Address}|{_localEndPoint.Port}";
-
-            var hash = MD5.HashData(Encoding.UTF8.GetBytes(payload));
-
-            return BitConverter.ToInt32(hash, 0);
+            // Use HashCode.Combine for a stable, non-cryptographic hash suitable for GetHashCode
+            return HashCode.Combine(_localEndPoint.Address.GetHashCode(), _localEndPoint.Port);
         }
 
         public override bool Equals(object? obj)
