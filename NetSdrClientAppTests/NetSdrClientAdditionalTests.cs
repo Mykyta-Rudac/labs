@@ -1,6 +1,9 @@
 using Moq;
 using NetSdrClientApp;
+using NetSdrClientApp.Helpers;
 using NetSdrClientApp.Networking;
+using System.IO;
+using System.Net.Sockets;
 
 namespace NetSdrClientAppTests;
 
@@ -105,5 +108,90 @@ public class NetSdrClientAdditionalTests : NetSdrClientTestBase
 
         // Assert - SendMessageAsync should be called exactly 3 times (from first Connect only)
         _tcpMock.Verify(tcp => tcp.SendMessageAsync(It.IsAny<byte[]>()), Times.Exactly(3));
+    }
+
+    /// <summary>
+    /// Test AsyncListenerHelper.HandleListenerException with OperationCanceledException.
+    /// Ensures the helper correctly handles and suppresses cancellation.
+    /// </summary>
+    [Test]
+    public void AsyncListenerHelper_HandleListenerException_WithOperationCanceled_ReturnsFalse()
+    {
+        // Arrange
+        var ex = new OperationCanceledException("Operation was cancelled");
+
+        // Act
+        bool shouldRethrow = AsyncListenerHelper.HandleListenerException(ex, "test context");
+
+        // Assert
+        Assert.That(shouldRethrow, Is.False);
+    }
+
+    /// <summary>
+    /// Test AsyncListenerHelper.HandleListenerException with SocketException and rethrowSocket=true.
+    /// Ensures that SocketException is rethrown when rethrowSocket flag is set.
+    /// </summary>
+    [Test]
+    public void AsyncListenerHelper_HandleListenerException_WithSocketException_RethrowWhenFlagSet()
+    {
+        // Arrange
+        var ex = new SocketException(10049); // Some valid socket error code
+
+        // Act
+        bool shouldRethrow = AsyncListenerHelper.HandleListenerException(ex, "test context", rethrowSocket: true);
+
+        // Assert
+        Assert.That(shouldRethrow, Is.True);
+    }
+
+    /// <summary>
+    /// Test AsyncListenerHelper.HandleListenerException with ObjectDisposedException.
+    /// Ensures disposed exceptions are handled gracefully without rethrowing.
+    /// </summary>
+    [Test]
+    public void AsyncListenerHelper_HandleListenerException_WithObjectDisposed_ReturnsFalse()
+    {
+        // Arrange
+        var ex = new ObjectDisposedException("TestObject");
+
+        // Act
+        bool shouldRethrow = AsyncListenerHelper.HandleListenerException(ex, "test context");
+
+        // Assert
+        Assert.That(shouldRethrow, Is.False);
+    }
+
+    /// <summary>
+    /// Test AsyncListenerHelper.HandleListenerException with IOException.
+    /// Ensures I/O errors are logged and not rethrown.
+    /// </summary>
+    [Test]
+    public void AsyncListenerHelper_HandleListenerException_WithIOException_ReturnsFalse()
+    {
+        // Arrange
+        var ex = new IOException("I/O error occurred");
+
+        // Act
+        bool shouldRethrow = AsyncListenerHelper.HandleListenerException(ex, "test context");
+
+        // Assert
+        Assert.That(shouldRethrow, Is.False);
+    }
+
+    /// <summary>
+    /// Test AsyncListenerHelper.HandleListenerException with SocketException when rethrowSocket=false (default).
+    /// Ensures SocketException is NOT rethrown by default.
+    /// </summary>
+    [Test]
+    public void AsyncListenerHelper_HandleListenerException_WithSocketException_DoNotRethrowByDefault()
+    {
+        // Arrange
+        var ex = new SocketException(10049); // Some valid socket error code
+
+        // Act
+        bool shouldRethrow = AsyncListenerHelper.HandleListenerException(ex, "test context", rethrowSocket: false);
+
+        // Assert
+        Assert.That(shouldRethrow, Is.False);
     }
 }

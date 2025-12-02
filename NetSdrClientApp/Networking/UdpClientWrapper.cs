@@ -57,13 +57,10 @@ namespace NetSdrClientApp.Networking
                 _udpClient?.Close();
                 Console.WriteLine("Stopped listening for UDP messages.");
             }
-            catch (ObjectDisposedException)
+            catch (Exception ex)
             {
-                // already disposed
-            }
-            catch (SocketException ex)
-            {
-                NetSdrClientApp.Helpers.LogHelper.LogSocketError("Socket error while stopping", ex);
+                // ObjectDisposedException (already disposed) or SocketException (already stopped) are expected during cleanup
+                NetSdrClientApp.Helpers.AsyncListenerHelper.HandleListenerException(ex, "stopping UDP listener");
             }
         }
 
