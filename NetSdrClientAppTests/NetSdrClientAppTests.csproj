@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NetSdrClientApp\NetSdrClientApp.csproj" />
+    <ProjectReference Include="..\Common.Helpers\Common.Helpers.csproj" />
   </ItemGroup>
 
   <ItemGroup>

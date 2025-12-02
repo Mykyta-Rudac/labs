@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Helpers;
 
 namespace EchoTcpServer
 {
@@ -17,7 +18,7 @@ namespace EchoTcpServer
         private TcpListener? _listener;
         private CancellationTokenSource? _cancellationTokenSource;
 
-        private TaskCompletionSource<bool>? _startedTcs;
+        private readonly TaskCompletionSource<bool>? _startedTcs;
 
         /// <summary>
         /// Actual port assigned to the listener (useful when caller passes 0 for ephemeral port).
@@ -83,7 +84,7 @@ namespace EchoTcpServer
             }
         }
 
-        private async Task HandleClientAsync(TcpClient client, CancellationToken token)
+        private static async Task HandleClientAsync(TcpClient client, CancellationToken token)
         {
             using (NetworkStream stream = client.GetStream())
             {
@@ -92,20 +93,20 @@ namespace EchoTcpServer
                     byte[] buffer = new byte[8192];
                     int bytesRead;
 
-                    while (!token.IsCancellationRequested && (bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
+                    while (!token.IsCancellationRequested && (bytesRead = await stream.ReadAsync(buffer, token)) > 0)
                     {
                         // Echo back the received message
-                        await stream.WriteAsync(buffer, 0, bytesRead, token);
+                        await stream.WriteAsync(buffer.AsMemory(0, bytesRead), token);
                         Console.WriteLine($"Echoed {bytesRead} bytes to the client.");
                     }
                 }
                 catch (IOException ex)
                 {
-                    Console.WriteLine($"I/O error: {ex.Message}");
+                    LogHelper.Log($"I/O error: {ex.Message}");
                 }
                 catch (SocketException ex)
                 {
-                    Console.WriteLine($"Socket error: {ex.Message}");
+                    LogHelper.LogSocketError("Socket error", ex);
                 }
                 finally
                 {
@@ -119,14 +120,14 @@ namespace EchoTcpServer
         {
             if (_cancellationTokenSource != null)
             {
-                try { _cancellationTokenSource.Cancel(); } catch { }
+                try { _cancellationTokenSource.Cancel(); } catch (ObjectDisposedException) { /* Already disposed */ }
                 _cancellationTokenSource.Dispose();
                 _cancellationTokenSource = null;
             }
 
             if (_listener != null)
             {
-                try { _listener.Stop(); } catch { }
+                try { _listener.Stop(); } catch (SocketException) { /* Already stopped */ }
                 _listener = null;
             }
 
@@ -139,7 +140,7 @@ namespace EchoTcpServer
             EchoServer server = new EchoServer(5000);
 
             // Start the server in a separate task
-            var serverTask = Task.Run(() => server.StartAsync());
+            _ = Task.Run(() => server.StartAsync());
 
             string host = "127.0.0.1"; // Target IP
             int port = 60000;          // Target Port
@@ -170,6 +171,7 @@ namespace EchoTcpServer
         private readonly int _port;
         private readonly UdpClient _udpClient;
         private Timer? _timer;
+        private bool _disposed;
 
         public UdpTimedSender(string host, int port)
         {
@@ -186,7 +188,7 @@ namespace EchoTcpServer
             _timer = new Timer(SendMessageCallback, null, 0, intervalMilliseconds);
         }
 
-        ushort i = 0;
+        private ushort _sequenceCounter;
 
         private void SendMessageCallback(object? state)
         {
@@ -196,9 +198,9 @@ namespace EchoTcpServer
                 Random rnd = new Random();
                 byte[] samples = new byte[1024];
                 rnd.NextBytes(samples);
-                i++;
+                _sequenceCounter++;
 
-                byte[] msg = (new byte[] { 0x04, 0x84 }).Concat(BitConverter.GetBytes(i)).Concat(samples).ToArray();
+                byte[] msg = (new byte[] { 0x04, 0x84 }).Concat(BitConverter.GetBytes(_sequenceCounter)).Concat(samples).ToArray();
                 var endpoint = new IPEndPoint(IPAddress.Parse(_host), _port);
 
                 _udpClient.Send(msg, msg.Length, endpoint);
@@ -206,15 +208,15 @@ namespace EchoTcpServer
             }
             catch (FormatException ex)
             {
-                Console.WriteLine($"Invalid host format: {ex.Message}");
+                LogHelper.Log($"Invalid host format: {ex.Message}");
             }
             catch (SocketException ex)
             {
-                Console.WriteLine($"Socket error sending message: {ex.Message}");
+                LogHelper.LogSocketError("Socket error sending message", ex);
             }
             catch (ObjectDisposedException ex)
             {
-                Console.WriteLine($"UDP client disposed: {ex.Message}");
+                LogHelper.Log($"UDP client disposed: {ex.Message}");
             }
         }
 
@@ -226,8 +228,21 @@ namespace EchoTcpServer
 
         public void Dispose()
         {
-            StopSending();
-            _udpClient.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    StopSending();
+                    _udpClient.Dispose();
+                }
+                _disposed = true;
+            }
         }
 }
 }

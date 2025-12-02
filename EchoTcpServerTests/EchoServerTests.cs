@@ -28,7 +28,7 @@ public class EchoServerTests
             using var stream = client.GetStream();
 
             var message = Encoding.UTF8.GetBytes("hello-echo");
-            await stream.WriteAsync(message, 0, message.Length);
+            await stream.WriteAsync(message.AsMemory());
 
             // read back
             var buffer = new byte[message.Length];

@@ -8,14 +8,9 @@ namespace NetSdrClientApp.Helpers
         public static string ToHexString(byte[]? data)
         {
             if (data == null || data.Length == 0) return string.Empty;
-            try
-            {
-                return string.Join(' ', data.Select(b => Convert.ToString(b, 16).PadLeft(2, '0')));
-            }
-            catch
-            {
-                return string.Empty;
-            }
+
+            // Use a simple, safe format for bytes (lowercase hex, two digits)
+            return string.Join(' ', data.Select(b => b.ToString("x2")));
         }
     }
 }

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
-using System.Text;
+// No cryptographic hash required for GetHashCode; use HashCode.Combine instead
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Helpers;
 
 namespace NetSdrClientApp.Networking
 {
@@ -37,18 +37,11 @@ namespace NetSdrClientApp.Networking
                     Console.WriteLine($"Received from {result.RemoteEndPoint}");
                 }
             }
-            catch (OperationCanceledException)
+            catch (Exception ex)
             {
-                // Operation was cancelled
-            }
-            catch (SocketException ex)
-            {
-                Console.WriteLine($"Socket error receiving message: {ex.Message}");
-                throw;
-            }
-            catch (ObjectDisposedException)
-            {
-                // socket disposed while stopping
+                // For UDP we want to rethrow on SocketException to let callers observe it
+                if (AsyncListenerHelper.HandleListenerException(ex, "receiving message", rethrowSocket: true))
+                    throw;
             }
             finally
             {
@@ -65,13 +58,10 @@ namespace NetSdrClientApp.Networking
                 _udpClient?.Close();
                 Console.WriteLine("Stopped listening for UDP messages.");
             }
-            catch (ObjectDisposedException)
+            catch (Exception ex)
             {
-                // already disposed
-            }
-            catch (SocketException ex)
-            {
-                Console.WriteLine($"Socket error while stopping: {ex.Message}");
+                // ObjectDisposedException (already disposed) or SocketException (already stopped) are expected during cleanup
+                AsyncListenerHelper.HandleListenerException(ex, "stopping UDP listener");
             }
         }
 
@@ -82,12 +72,8 @@ namespace NetSdrClientApp.Networking
 
         public override int GetHashCode()
         {
-            var payload = $"{nameof(UdpClientWrapper)}|{_localEndPoint.Address}|{_localEndPoint.Port}";
-
-            using var md5 = MD5.Create();
-            var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(payload));
-
-            return BitConverter.ToInt32(hash, 0);
+            // Use HashCode.Combine for a stable, non-cryptographic hash suitable for GetHashCode
+            return HashCode.Combine(_localEndPoint.Address.GetHashCode(), _localEndPoint.Port);
         }
 
         public override bool Equals(object? obj)
@@ -96,7 +82,7 @@ namespace NetSdrClientApp.Networking
                 return false;
 
             return _localEndPoint.Address.Equals(other._localEndPoint.Address) &&
-                   _localEndPoint.Port == other._localEndPoint.Port;
+                   _localEndPoint.Port.Equals(other._localEndPoint.Port);
         }
     }
 }
